@@ -17,7 +17,7 @@ public class Client {
     private NioEventLoopGroup workGroup = new NioEventLoopGroup(4);
     private Channel channel;
     private Bootstrap bootstrap;
-    private final int MAX_CONNECT_COUNT = 3;
+    private final int MAX_CONNECT_COUNT = 10;
     private volatile int connectCount = 0;
 
     public static void main(String[] args) throws Exception {
@@ -30,8 +30,9 @@ public class Client {
         for (int i = 0; i < 10; i++) {
             if (channel != null && channel.isActive()) {
                 String content = "client msg " + i;
+                // 这里是分配的应用层的包大小
                 ByteBuf buf = channel.alloc().buffer(5 + content.getBytes().length);
-                buf.writeInt(5 + content.getBytes().length);
+                buf.writeInt(content.getBytes().length);
                 buf.writeByte(CustomHeartbeatHandler.CUSTOM_MSG);
                 buf.writeBytes(content.getBytes());
                 channel.writeAndFlush(buf);
@@ -51,7 +52,7 @@ public class Client {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline p = socketChannel.pipeline();
                             p.addLast(new IdleStateHandler(0, 0, 5));
-                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 4, -4, 0));
+                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 4, 1, 0));
                             p.addLast(new ClientHandler(Client.this));
                         }
                     });
@@ -63,8 +64,7 @@ public class Client {
     }
 
     protected void doConnect() {
-        connectCount++;
-        // 最大重连次数
+        // 最大重试次数
         if (connectCount > MAX_CONNECT_COUNT) {
             return;
         }

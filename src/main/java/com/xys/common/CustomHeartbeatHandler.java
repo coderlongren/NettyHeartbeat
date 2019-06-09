@@ -19,7 +19,7 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
 
     @Override
     protected void channelRead0(ChannelHandlerContext context, ByteBuf byteBuf) throws Exception {
-        byte flag = byteBuf.getByte(4);
+        byte flag = byteBuf.getByte(0);
         if (flag == PING_MSG) {
             sendPongMsg(context);
         } else if (flag == PONG_MSG){
@@ -31,8 +31,8 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
 
     protected void sendPingMsg(ChannelHandlerContext context) {
         ByteBuf buf = context.alloc().buffer(5);
-        buf.writeInt(5);
         buf.writeByte(PING_MSG);
+        buf.writeInt(0);
         buf.retain();
         context.writeAndFlush(buf);
         heartbeatCount++;
@@ -41,9 +41,9 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
 
     private void sendPongMsg(ChannelHandlerContext context) {
         ByteBuf buf = context.alloc().buffer(5);
-        buf.writeInt(5);
         buf.writeByte(PONG_MSG);
-        context.channel().writeAndFlush(buf);
+        buf.writeInt(0);
+        context.writeAndFlush(buf);
         heartbeatCount++;
         System.out.println(name + " sent pong msg to " + context.channel().remoteAddress() + ", count: " + heartbeatCount);
     }

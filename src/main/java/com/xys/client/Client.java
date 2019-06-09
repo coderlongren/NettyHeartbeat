@@ -32,8 +32,8 @@ public class Client {
                 String content = "client msg " + i;
                 // 这里是分配的应用层的包大小
                 ByteBuf buf = channel.alloc().buffer(5 + content.getBytes().length);
-                buf.writeInt(content.getBytes().length);
                 buf.writeByte(CustomHeartbeatHandler.CUSTOM_MSG);
+                buf.writeInt(content.getBytes().length);
                 buf.writeBytes(content.getBytes());
                 channel.writeAndFlush(buf);
             }
@@ -52,7 +52,7 @@ public class Client {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline p = socketChannel.pipeline();
                             p.addLast(new IdleStateHandler(0, 0, 5));
-                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 4, 1, 0));
+                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 1, 4, 0, 0));
                             p.addLast(new ClientHandler(Client.this));
                         }
                     });

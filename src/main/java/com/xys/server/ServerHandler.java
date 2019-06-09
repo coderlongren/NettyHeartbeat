@@ -18,7 +18,7 @@ public class ServerHandler extends CustomHeartbeatHandler {
         buf.readBytes(data);
         String content = new String(data);
         System.out.println(name + " get content: " + content);
-        channelHandlerContext.write(responseBuf);
+        channelHandlerContext.writeAndFlush(responseBuf);
     }
 
     /**

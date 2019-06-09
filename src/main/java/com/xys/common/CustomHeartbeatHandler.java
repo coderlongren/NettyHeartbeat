@@ -1,12 +1,14 @@
 package com.xys.common;
 
+import com.xys.bean.ProtocolBean;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleStateEvent;
 
 
-public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler<ByteBuf> {
+public abstract class CustomHeartbeatHandler extends ChannelInboundHandlerAdapter {
     public static final byte PING_MSG = 1;
     public static final byte PONG_MSG = 2;
     public static final byte CUSTOM_MSG = 3;
@@ -18,16 +20,30 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext context, ByteBuf byteBuf) throws Exception {
-        byte flag = byteBuf.getByte(4);
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        ProtocolBean protocolBean = (ProtocolBean) msg;
+        System.out.println("ddddddddddddddddd" + protocolBean);
+        byte flag = protocolBean.getFlag();
         if (flag == PING_MSG) {
-            sendPongMsg(context);
-        } else if (flag == PONG_MSG){
-            System.out.println(name + " get pong msg from " + context.channel().remoteAddress());
+            sendPongMsg(ctx);
+        } else if (flag == PONG_MSG) {
+            System.out.println(name + " get pong msg from " + ctx.channel().remoteAddress());
         } else {
-            handleData(context, byteBuf);
+            System.out.println("ssssss");
+            handleData(ctx, protocolBean);
         }
     }
+//    @Override
+//    protected void channelRead(ChannelHandlerContext context, ByteBuf byteBuf) throws Exception {
+//        byte flag = byteBuf.getByte(4);
+//        if (flag == PING_MSG) {
+//            sendPongMsg(context);
+//        } else if (flag == PONG_MSG){
+//            System.out.println(name + " get pong msg from " + context.channel().remoteAddress());
+//        } else {
+//            handleData(context, byteBuf);
+//        }
+//    }
 
     protected void sendPingMsg(ChannelHandlerContext context) {
         ByteBuf buf = context.alloc().buffer(5);
@@ -39,7 +55,7 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
         System.out.println(name + " sent ping msg to " + context.channel().remoteAddress() + ", count: " + heartbeatCount);
     }
 
-    private void sendPongMsg(ChannelHandlerContext context) {
+    protected void sendPongMsg(ChannelHandlerContext context) {
         ByteBuf buf = context.alloc().buffer(5);
         buf.writeInt(5);
         buf.writeByte(PONG_MSG);
@@ -48,7 +64,7 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
         System.out.println(name + " sent pong msg to " + context.channel().remoteAddress() + ", count: " + heartbeatCount);
     }
 
-    protected abstract void handleData(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf);
+    protected abstract void handleData(ChannelHandlerContext channelHandlerContext, ProtocolBean protocolBean);
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
@@ -80,6 +96,7 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         System.err.println("---" + ctx.channel().remoteAddress() + " is inactive---");
     }
+
 
     protected void handleReaderIdle(ChannelHandlerContext ctx) {
         System.err.println("---READER_IDLE---");

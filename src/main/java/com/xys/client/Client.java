@@ -1,6 +1,7 @@
 package com.xys.client;
 
 import com.xys.common.CustomHeartbeatHandler;
+import com.xys.protocol.MyProtocolDecoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -10,6 +11,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.timeout.IdleStateHandler;
 
+import java.nio.charset.Charset;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -28,15 +30,13 @@ public class Client {
 
     public void sendData() throws Exception {
         for (int i = 0; i < 10; i++) {
-            if (channel != null && channel.isActive()) {
-                String content = "client msg " + i;
-                // 这里是分配的应用层的包大小
-                ByteBuf buf = channel.alloc().buffer(5 + content.getBytes().length);
-                buf.writeInt(content.getBytes().length);
-                buf.writeByte(CustomHeartbeatHandler.CUSTOM_MSG);
-                buf.writeBytes(content.getBytes());
-                channel.writeAndFlush(buf);
-            }
+            String content = "client msg  " + i;
+            // 这里是分配的应用层的包大小
+            ByteBuf buf = channel.alloc().buffer(5 + content.getBytes().length);
+            buf.writeByte(CustomHeartbeatHandler.CUSTOM_MSG);
+            buf.writeInt(content.getBytes().length);
+            buf.writeBytes(content.getBytes(Charset.forName("UTF-8")));
+            channel.writeAndFlush(buf);
 
             Thread.sleep(1000);
         }
@@ -52,7 +52,8 @@ public class Client {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline p = socketChannel.pipeline();
                             p.addLast(new IdleStateHandler(0, 0, 5));
-                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 4, 1, 0));
+//                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 4, 1, 0));
+                            p.addLast(new MyProtocolDecoder(1024, 1, 4, 0, 0, false));
                             p.addLast(new ClientHandler(Client.this));
                         }
                     });

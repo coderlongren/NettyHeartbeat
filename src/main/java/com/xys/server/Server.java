@@ -1,5 +1,6 @@
 package com.xys.server;
 
+import com.xys.protocol.MyProtocolDecoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -23,7 +24,8 @@ public class Server {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline p = socketChannel.pipeline();
                             p.addLast(new IdleStateHandler(10, 0, 0));
-                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 4, 1, 0));
+//                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 4, 1, 0));
+                            p.addLast(new MyProtocolDecoder(1024, 1, 4, 0, 0));
                             p.addLast(new ServerHandler());
                         }
                     });

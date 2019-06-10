@@ -1,6 +1,7 @@
-package com.xys.client;
+package com.coderlong.client;
 
-import com.xys.common.CustomHeartbeatHandler;
+import com.coderlong.common.CustomHeartbeatHandler;
+import com.coderlong.protocol.MyProtocolDecoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -10,7 +11,6 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.timeout.IdleStateHandler;
 
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class Client {
@@ -52,7 +52,8 @@ public class Client {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline p = socketChannel.pipeline();
                             p.addLast(new IdleStateHandler(0, 0, 5));
-                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 1, 4, 0, 0));
+//                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 1, 4, 0, 0));
+                            p.addLast(new MyProtocolDecoder(1024, 1, 4, 0, 0, false));
                             p.addLast(new ClientHandler(Client.this));
                         }
                     });

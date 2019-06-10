@@ -1,9 +1,11 @@
-package com.xys.protocol;
+package com.coderlong.protocol;
 
-import com.xys.bean.ProtocolBean;
+import com.coderlong.exception.ProtocolException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @Classname MyProtocolDecoder
@@ -12,6 +14,8 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  * @Created by coderlong
  */
 public class MyProtocolDecoder extends LengthFieldBasedFrameDecoder {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LengthFieldBasedFrameDecoder.class);
+
     public MyProtocolDecoder(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip, boolean failFast) {
         super(maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip, failFast);
 
@@ -20,21 +24,19 @@ public class MyProtocolDecoder extends LengthFieldBasedFrameDecoder {
     @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
         in = (ByteBuf) super.decode(ctx, in);
-
         if (in == null) {
             return null;
         }
-        //读取flag字段
+        //flag
         byte flag = in.readByte();
-        //读取length字段
+        //message length
         int length = in.readInt();
-        System.out.println("flag : " + flag + "len :" + length + "len :" + in.readableBytes());
-//        if (in.readableBytes() != length) {
-//            throw new Exception("标记的长度不符合实际长度");
-//        }
         byte[] bytes = null;
+        if (in.readableBytes() != length) {
+            throw new ProtocolException("mark length do not match real length of message");
+        }
         if (length != 0) {
-            //读取body
+            //read message body
             bytes = new byte[in.readableBytes()];
             in.readBytes(bytes);
         }

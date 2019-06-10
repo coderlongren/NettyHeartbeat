@@ -1,8 +1,17 @@
-package com.xys.protocol;
+package com.coderlong.protocol;
 
 public class ProtocolBean {
+    /**
+     * 心跳标识， 1 PING, 2 PONG, 3 MSG
+     */
     private byte flag;
+    /**
+     *  message length
+     */
     private int length;
+    /**
+     *  message
+     */
     private String context;
 
     public ProtocolBean() {

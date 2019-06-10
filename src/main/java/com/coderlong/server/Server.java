@@ -1,6 +1,6 @@
-package com.xys.server;
+package com.coderlong.server;
 
-import com.xys.protocol.MyProtocol;
+import com.coderlong.protocol.MyProtocolDecoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -8,7 +8,6 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.timeout.IdleStateHandler;
 
 public class Server {
@@ -24,8 +23,8 @@ public class Server {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline p = socketChannel.pipeline();
                             p.addLast(new IdleStateHandler(10, 0, 0));
-                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 1, 4, 0, 0));
-                            p.addLast(new MyProtocol());
+//                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 1, 4, 0, 0));
+                            p.addLast(new MyProtocolDecoder(1024, 1, 4, 0, 0, false));
                             p.addLast(new ServerHandler());
                         }
                     });

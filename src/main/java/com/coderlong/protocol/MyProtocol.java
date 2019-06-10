@@ -1,9 +1,10 @@
-package com.xys.protocol;
+package com.coderlong.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,6 +24,9 @@ public class MyProtocol extends ByteToMessageDecoder {
             out.add(new ProtocolBean(flag, length, context));
         } else {
             out.add(new ProtocolBean(flag, length, ""));
+            List<Integer> l = new ArrayList<>();
+            List<Integer> l1 = new ArrayList<>();
+            l.addAll(l1);
         }
     }
 }

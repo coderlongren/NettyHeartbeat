@@ -1,12 +1,13 @@
-package com.xys.common;
+package com.coderlong.common;
 
+import com.coderlong.protocol.ProtocolBean;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleStateEvent;
 
 
-public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler<ByteBuf> {
+public abstract class CustomHeartbeatHandler extends ChannelInboundHandlerAdapter {
     public static final byte PING_MSG = 1;
     public static final byte PONG_MSG = 2;
     public static final byte CUSTOM_MSG = 3;
@@ -18,14 +19,15 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext context, ByteBuf byteBuf) throws Exception {
-        byte flag = byteBuf.getByte(0);
+    public void channelRead(ChannelHandlerContext context, Object object) throws Exception {
+        ProtocolBean bean = (ProtocolBean) object;
+        byte flag = bean.getFlag();
         if (flag == PING_MSG) {
             sendPongMsg(context);
         } else if (flag == PONG_MSG){
             System.out.println(name + " get pong msg from " + context.channel().remoteAddress());
         } else {
-            handleData(context, byteBuf);
+            handleData(context, bean);
         }
     }
 
@@ -48,7 +50,7 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
         System.out.println(name + " sent pong msg to " + context.channel().remoteAddress() + ", count: " + heartbeatCount);
     }
 
-    protected abstract void handleData(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf);
+    protected abstract void handleData(ChannelHandlerContext channelHandlerContext, ProtocolBean bean);
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {

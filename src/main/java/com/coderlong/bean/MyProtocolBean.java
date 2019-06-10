@@ -1,4 +1,4 @@
-package com.xys.bean;
+package com.coderlong.bean;
 
 /**
  * @Classname ProtocolBean
@@ -6,7 +6,7 @@ package com.xys.bean;
  * @Date 19-6-8 下午10:58
  * @Created by coderlong
  */
-public class ProtocolBean {
+public class MyProtocolBean {
     //信息标志  0xA 表示心跳包    0xC 表示超时包  0xC 业务信息包
     private byte flag;
 
@@ -16,10 +16,10 @@ public class ProtocolBean {
     //内容
     private String content;
 
-    public ProtocolBean() {
+    public MyProtocolBean() {
     }
 
-    public ProtocolBean(byte flag, int length, String content) {
+    public MyProtocolBean(byte flag, int length, String content) {
         this.flag = flag;
         this.length = length;
         this.content = content;
